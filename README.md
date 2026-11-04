@@ -149,7 +149,11 @@ from the sitemap):
 The site is **live** (since 2026-11-04). Deployment runs on GitHub Actions
 (`.github/workflows/deploy.yml`, Pages source "GitHub Actions") and
 triggers on pushes to `main` or manual dispatch — every push to `main`
-goes to production:
+goes to production. Changes are made on a short-lived local branch,
+checked (`npm run check && npm run build && npm run verify`), approved
+by the owner, then fast-forwarded into `main` and pushed — no pull
+requests, no force pushes (see **Change workflow** in `AGENTS.md`).
+The workflow:
 
 1. `actions/setup-node` with the version from `.nvmrc`, then `npm ci`.
 2. `npm run build` — the site is built **once**.
