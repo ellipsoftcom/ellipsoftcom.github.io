@@ -146,8 +146,10 @@ from the sitemap):
 
 ## Deployment
 
-Deployment is prepared via GitHub Actions (`.github/workflows/deploy.yml`)
-and triggers on pushes to `main` or manual dispatch:
+The site is **live** (since 2026-11-04). Deployment runs on GitHub Actions
+(`.github/workflows/deploy.yml`, Pages source "GitHub Actions") and
+triggers on pushes to `main` or manual dispatch — every push to `main`
+goes to production:
 
 1. `actions/setup-node` with the version from `.nvmrc`, then `npm ci`.
 2. `npm run build` — the site is built **once**.
@@ -156,11 +158,6 @@ and triggers on pushes to `main` or manual dispatch:
 4. Only if verify passes: `actions/upload-pages-artifact` uploads that
    same `dist/`, and the `deploy` job (`actions/deploy-pages`) publishes
    it. A failed verify means nothing is uploaded or deployed.
-
-> **Launch note:** the repository's Pages setting currently serves the `main`
-> branch directly (the old static-output setup). Before the rebuilt site can
-> deploy, the owner must switch **Settings → Pages → Source** to
-> **"GitHub Actions"**. Until then, the live site keeps serving `main` as-is.
 
 Every deployment MUST keep in `public/`:
 

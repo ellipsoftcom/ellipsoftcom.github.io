@@ -12,7 +12,11 @@ advisor). Implement what is asked; when something is ambiguous or blocking,
    build, then `npm run verify` on that exact `dist/`; the Pages artifact
    is uploaded and deployed only if verify passes (no rebuild in
    between). Never weaken or skip the verify gate.
-   All work happens on the `rebuild` branch until launch.
+   **The site is LIVE** (launched 2026-11-04): every push to `main`
+   deploys to https://ellipsoft.com via that workflow. The post-launch
+   branching workflow is pending an owner decision — until then, work
+   on a branch and never push to `main` without the owner's explicit
+   approval for that push.
 2. **Stack**: Astro (latest stable), TypeScript strict, npm, Node LTS
    (`.nvmrc`).
 3. **Pages** (both languages): Home, Services, Products (listing + one
@@ -54,9 +58,9 @@ advisor). Implement what is asked; when something is ambiguous or blocking,
 
 ## Hard rules
 
-- **Never push to `main`.** Never force-push. All work goes to `rebuild`
-  (or feature branches off it) unless the owner explicitly approves a
-  merge/launch.
+- **Never push to `main` without the owner's explicit approval** — every
+  push to `main` deploys to production. **Never force-push**, to any
+  branch, ever: the one-time launch history rewrite has been used.
 - **Never change repository/GitHub settings** (Pages source, domains,
   secrets, branch protection). Settings changes are owner-only actions.
 - **Never remove or empty `public/CNAME`** (binds `ellipsoft.com`) or
@@ -86,12 +90,20 @@ advisor). Implement what is asked; when something is ambiguous or blocking,
   (GitHub noreply address of the `ellipsoftcom` account). Before
   committing, check `git config user.name` — never commit with a
   personal identity, and never change the global git config.
-- Do NOT rewrite existing history on your own. **Launch plan (owner
-  approval required — do NOT execute now):** at launch, `main` will be
-  published with a fresh history (a single initial commit authored by
-  EllipSoft, e.g. created from an orphan branch) and the remote
-  `rebuild` branch will be deleted, so the founder's name no longer
-  appears in the visible commit history.
+- **Push identity:** pushes MUST authenticate as the `ellipsoftcom`
+  account (the pusher is shown publicly on the Actions run, the
+  deployment and the repo activity). `origin`'s push URL is SSH
+  (`git@github.com:…`); confirm with `ssh -T git@github.com` ("Hi
+  ellipsoftcom!") before pushing. Never push over HTTPS with a personal
+  credential.
+- **History is final — never rewrite it.** The one-time launch exception
+  was used on 2026-11-04: `main` was replaced by a single EllipSoft
+  commit (`b26ad23` "EllipSoft website", built from an orphan branch).
+  No further history rewrites or force pushes, for any reason. The old
+  history exists only in an offline local backup bundle that must never
+  be pushed or committed. The remote `rebuild` branch (old history,
+  founder's name in old commits) still exists — deleting it needs
+  separate owner approval.
 
 ## Conventions
 
@@ -156,9 +168,11 @@ npm run preview   # spot-check /ar/, /en/, /ar/about/ ↔ /en/about/ switch,
                   # and that CNAME + .nojekyll land in dist/
 ```
 
-## Launch checklist (owner-only actions — never do these yourself)
+## Launch (completed 2026-11-04)
 
-1. Merge `rebuild` → `main` (owner approval).
-2. Switch **Settings → Pages → Source** to **"GitHub Actions"**.
-3. Verify https://ellipsoft.com serves the new build, custom domain still
-   attached, DNS unchanged (apex A records + www CNAME).
+1. ✅ Owner switched **Settings → Pages → Source** to **"GitHub Actions"**.
+2. ✅ `main` published as a single EllipSoft commit (one-time,
+   owner-authorized force-with-lease push).
+3. ✅ First workflow run built, verified and deployed; https://ellipsoft.com
+   serves the new site, custom domain and enforced HTTPS unchanged.
+4. ⏳ Remote `rebuild` branch deletion — awaiting owner approval.
