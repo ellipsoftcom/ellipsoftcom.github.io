@@ -1,0 +1,243 @@
+---
+import { SITE } from '../config';
+import { pageIds, pageRoutes } from '../i18n/ui';
+import type { Locale } from '../i18n/ui';
+import { getDictionary, localizedPath, otherLocale, switchLocalePath } from '../i18n/utils';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = getDictionary(locale);
+const other = otherLocale(locale);
+
+// Current pathname is used for the active-nav state and to compute the
+// 1:1 language-switcher counterpart of this page.
+const pathname = Astro.url.pathname.endsWith('/')
+  ? Astro.url.pathname
+  : `${Astro.url.pathname}/`;
+
+const navItems = pageIds.map((id) => ({
+  id,
+  href: localizedPath(locale, pageRoutes[id]),
+  label: t.nav[id],
+}));
+
+const isActive = (href: string) => pathname === href;
+const switchHref = switchLocalePath(locale, pathname);
+---
+
+<header class="site-header brand-surface">
+  <div class="container header-inner">
+    <a class="brand" href={localizedPath(locale, '/')} aria-label={`${SITE.name} — ${t.nav.home}`}>
+      <img src="/brand/ellipsoft-mark-dark.svg" alt="" width="28" height="28" />
+      <span>{SITE.name}</span>
+    </a>
+
+    <nav class="nav-desktop" aria-label={t.mainNavLabel}>
+      <ul>
+        {
+          navItems.map((item) => (
+            <li>
+              <a href={item.href} aria-current={isActive(item.href) ? 'page' : undefined}>
+                {item.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <a
+      class="lang-switch"
+      href={switchHref}
+      hreflang={other}
+      lang={other}
+    >
+      {t.switchLangLabel}
+    </a>
+
+    <details class="nav-mobile">
+      <summary aria-label={t.menuLabel}>
+        <svg
+          width="22"
+          height="22"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          aria-hidden="true"
+        >
+          <path d="M4 7h16M4 12h16M4 17h16"></path>
+        </svg>
+      </summary>
+      <nav aria-label={t.mainNavLabel}>
+        <ul>
+          {
+            navItems.map((item) => (
+              <li>
+                <a href={item.href} aria-current={isActive(item.href) ? 'page' : undefined}>
+                  {item.label}
+                </a>
+              </li>
+            ))
+          }
+        </ul>
+        <a class="lang-switch" href={switchHref} hreflang={other} lang={other}>
+          {t.switchLangLabel}
+        </a>
+      </nav>
+    </details>
+  </div>
+</header>
+
+<style>
+  .site-header {
+    background: var(--color-bg);
+    border-block-end: 1px solid var(--color-border);
+    position: sticky;
+    top: 0;
+    z-index: 50;
+  }
+
+  .header-inner {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    min-height: 4rem;
+  }
+
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    color: var(--color-text);
+    font-weight: 700;
+    text-decoration: none;
+    font-size: var(--text-lg);
+    margin-inline-end: auto;
+  }
+
+  .brand:hover {
+    color: var(--color-text);
+  }
+
+  .nav-desktop ul {
+    display: flex;
+    gap: var(--space-6);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .nav-desktop a {
+    display: inline-block;
+    padding-block: var(--space-2);
+    color: var(--color-text-muted);
+    text-decoration: none;
+  }
+
+  .nav-desktop a:hover {
+    color: var(--color-text);
+  }
+
+  /* Current page: accent color plus an underline, so it does not rely
+     on color alone (WCAG 1.4.1). */
+  .nav-desktop a[aria-current='page'] {
+    color: var(--color-accent);
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 0.45em;
+  }
+
+  .lang-switch {
+    color: var(--color-text-muted);
+    text-decoration: none;
+    font-weight: 600;
+    padding-block: var(--space-1);
+  }
+
+  .lang-switch:hover {
+    color: var(--color-accent);
+  }
+
+  /* Mobile navigation — <details>/<summary>, works without JavaScript. */
+  .nav-mobile {
+    display: none;
+    position: relative;
+  }
+
+  .nav-mobile summary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border-radius: var(--radius-md);
+    color: var(--color-text);
+    cursor: pointer;
+    list-style: none;
+  }
+
+  .nav-mobile summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .nav-mobile summary:hover {
+    background: var(--color-surface);
+  }
+
+  .nav-mobile nav {
+    position: absolute;
+    inset-inline-end: 0;
+    top: calc(100% + var(--space-2));
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-md);
+    min-width: 12rem;
+    padding: var(--space-4);
+  }
+
+  .nav-mobile ul {
+    display: grid;
+    gap: var(--space-1);
+    list-style: none;
+    margin: 0 0 var(--space-3);
+    padding: 0;
+  }
+
+  .nav-mobile nav a {
+    display: block;
+    padding: var(--space-2) var(--space-3);
+    border-radius: var(--radius-sm);
+    color: var(--color-text);
+    text-decoration: none;
+    /* Comfortable touch targets */
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+  }
+
+  .nav-mobile nav a:hover,
+  .nav-mobile nav a[aria-current='page'] {
+    background: var(--color-accent-soft);
+    color: var(--color-accent);
+  }
+
+  @media (max-width: 47.99rem) {
+    .nav-desktop {
+      display: none;
+    }
+
+    .nav-mobile {
+      display: block;
+    }
+
+    .header-inner .lang-switch {
+      display: none;
+    }
+  }
+</style>

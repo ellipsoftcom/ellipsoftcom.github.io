@@ -1,0 +1,246 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ArrowLabel from '../components/ArrowLabel.astro';
+import { SITE, whatsappUrlWithText } from '../config';
+import type { Locale } from '../i18n/ui';
+import { getDictionary, localizedPath } from '../i18n/utils';
+import type { Product } from '../data/products';
+import { productJsonLd } from '../seo/jsonLd';
+
+interface Props {
+  locale: Locale;
+  product: Product;
+}
+
+const { locale, product } = Astro.props;
+const t = getDictionary(locale);
+const name = product.name[locale];
+const l10n = (template: string) => template.replace(/\{name\}/g, name);
+
+const statusLabel =
+  product.status === 'coming-soon' ? t.products.statusComingSoon : t.products.statusAvailable;
+
+// CTA logic: while coming-soon → WhatsApp early access with a prefilled
+// message; once available with a listing URL → Google Play button.
+const isPublished = product.status === 'available' && product.playStoreUrl !== '';
+const ctaHref = isPublished
+  ? product.playStoreUrl
+  : whatsappUrlWithText(product.earlyAccessMessage[locale]);
+const ctaLabel = isPublished ? t.products.googlePlayLabel : product.cta.label[locale];
+
+const privacyHref = localizedPath(locale, `/products/${product.slug}/privacy/`);
+---
+
+<BaseLayout
+  locale={locale}
+  title={`${product.headline[locale]} — ${SITE.name}`}
+  description={product.metaDescription[locale]}
+  pagePath={`/products/${product.slug}/`}
+  ogImagePath={`/og/waraq-${locale}.png`}
+  ogImageAlt={t.og.waraqAlt}
+  jsonLd={[productJsonLd(product, locale)]}
+>
+  {/* Hero: headline, subtitle, status + price badges. */}
+  <section class="page-hero">
+    <div class="container">
+      <h1>{product.headline[locale]}</h1>
+      <p class="subtitle">{product.subtitle[locale]}</p>
+      <div class="badges">
+        <span class="badge">{statusLabel}</span>
+        <span class="badge">{product.price[locale]}</span>
+      </div>
+    </div>
+  </section>
+
+  {/* What it is. */}
+  <section class="container section">
+    <h2>{l10n(t.products.aboutHeading)}</h2>
+    <p>{product.about[locale]}</p>
+  </section>
+
+  {/* Features. */}
+  <section class="container section">
+    <h2>{t.products.featuresHeading}</h2>
+    <ul class="features">
+      {
+        product.features.map((feature) => (
+          <li>
+            <strong>{feature.title[locale]}</strong> — {feature.text[locale]}
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  {/* Privacy highlights. */}
+  <section class="container section">
+    <h2>{product.privacyHighlights.heading[locale]}</h2>
+    <ul class="highlights">
+      {product.privacyHighlights.items[locale].map((item) => <li>{item}</li>)}
+    </ul>
+    <a class="privacy-link" href={privacyHref}><ArrowLabel text={t.products.privacyLinkLabel} /></a>
+  </section>
+
+  {/* Screenshots — rendered only when the product has any. */}
+  {
+    product.screenshots.length > 0 && (
+      <section class="container section">
+        <h2>{t.products.screenshotsHeading}</h2>
+        <ul class="shots">
+          {product.screenshots.map((shot) => (
+            <li>
+              <img src={shot} alt={name} loading="lazy" />
+            </li>
+          ))}
+        </ul>
+      </section>
+    )
+  }
+
+  {/* Call to action. */}
+  <section class="container section cta">
+    <h2>{product.cta.heading[locale]}</h2>
+    <p>{product.cta.text[locale]}</p>
+    <a class="button" href={ctaHref} rel="noopener noreferrer" target="_blank">
+      {ctaLabel}
+    </a>
+  </section>
+</BaseLayout>
+
+<style>
+  .page-hero {
+    padding-block: var(--space-16) var(--space-12);
+    border-block-end: 1px solid var(--color-border);
+  }
+
+  h1 {
+    font-size: var(--text-3xl);
+  }
+
+  .subtitle {
+    color: var(--color-text-muted);
+    font-size: var(--text-lg);
+    max-width: 60ch;
+  }
+
+  .badges {
+    display: flex;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    background: var(--color-accent-soft);
+    color: var(--color-accent);
+    border-radius: var(--radius-full);
+    padding: var(--space-1) var(--space-3);
+    font-size: var(--text-sm);
+    font-weight: 600;
+  }
+
+  .section {
+    padding-block: var(--space-12);
+  }
+
+  .section h2 {
+    font-size: var(--text-2xl);
+  }
+
+  .section p {
+    max-width: 65ch;
+  }
+
+  .features {
+    display: grid;
+    gap: var(--space-4);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    max-width: 65ch;
+  }
+
+  .features li {
+    position: relative;
+    padding-inline-start: var(--space-5);
+  }
+
+  .features li::before {
+    content: '';
+    position: absolute;
+    inset-inline-start: 0;
+    top: 0.55em;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: var(--radius-full);
+    background: var(--color-accent);
+  }
+
+  .features strong {
+    font-weight: 600;
+  }
+
+  .highlights {
+    display: grid;
+    gap: var(--space-2);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    max-width: 65ch;
+  }
+
+  .highlights li {
+    position: relative;
+    padding-inline-start: var(--space-5);
+  }
+
+  .highlights li::before {
+    content: '';
+    position: absolute;
+    inset-inline-start: 0;
+    top: 0.65em;
+    width: 0.4rem;
+    height: 0.4rem;
+    border-radius: var(--radius-full);
+    background: var(--color-accent);
+  }
+
+  .privacy-link {
+    display: inline-block;
+    margin-block-start: var(--space-4);
+    color: var(--color-accent);
+    font-weight: 600;
+  }
+
+  .privacy-link:hover {
+    color: var(--color-accent-strong);
+  }
+
+  .shots {
+    display: grid;
+    gap: var(--space-6);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  @media (min-width: 48rem) {
+    .shots {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  .shots img {
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+  }
+
+  .cta {
+    padding-block: var(--space-12) var(--space-16);
+  }
+
+  .cta .button {
+    margin-block-start: var(--space-2);
+  }
+</style>

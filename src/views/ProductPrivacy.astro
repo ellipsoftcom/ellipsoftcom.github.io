@@ -1,0 +1,215 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import type { Locale } from '../i18n/ui';
+import { formatDate, getDictionary } from '../i18n/utils';
+import type { Product } from '../data/products';
+
+interface Props {
+  locale: Locale;
+  product: Product;
+}
+
+const { locale, product } = Astro.props;
+const t = getDictionary(locale);
+const name = product.name[locale];
+const l10n = (template: string) => template.replace(/\{name\}/g, name);
+
+// Date format: Levantine months + Western digits (see i18n/utils.ts) —
+// "1 تشرين الثاني 2026" / "November 1, 2026".
+const lastUpdated = formatDate(product.privacy.lastUpdated, locale);
+---
+
+<BaseLayout
+  locale={locale}
+  title={l10n(t.products.privacyTitle)}
+  description={l10n(t.products.privacyDescription)}
+  pagePath={`/products/${product.slug}/privacy/`}
+  ogImagePath={`/og/waraq-${locale}.png`}
+  ogImageAlt={t.og.waraqAlt}
+>
+  <section class="page-hero">
+    <div class="container">
+      <h1>{l10n(t.products.privacyHeading)}</h1>
+      <p class="last-updated">
+        {t.products.privacyLastUpdated}
+        <time datetime={product.privacy.lastUpdated}>{lastUpdated}</time>
+      </p>
+    </div>
+  </section>
+
+  <article class="container policy">
+    {
+      product.privacy.sections.map((section, index) => (
+        <section>
+          <h2>
+            <span class="section-number">{index + 1}.</span> {section.heading[locale]}
+          </h2>
+          {section.paragraph && <p>{section.paragraph[locale]}</p>}
+          {section.list && (
+            <ul>
+              {section.list[locale].map((item) => (
+                <li>{item}</li>
+              ))}
+            </ul>
+          )}
+          {section.table && (
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th scope="col">{section.table.columns.permission[locale]}</th>
+                    <th scope="col">{section.table.columns.reason[locale]}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {section.table.rows.map((row) => (
+                    <tr>
+                      <td class="perm">{row.permission[locale]}</td>
+                      <td>{row.reason[locale]}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+          {section.table && <p class="table-note">{section.table.note[locale]}</p>}
+        </section>
+      ))
+    }
+  </article>
+</BaseLayout>
+
+<style>
+  .page-hero {
+    padding-block: var(--space-16) var(--space-12);
+    border-block-end: 1px solid var(--color-border);
+  }
+
+  h1 {
+    font-size: var(--text-3xl);
+  }
+
+  .last-updated {
+    color: var(--color-text-muted);
+    font-size: var(--text-sm);
+    display: flex;
+    gap: var(--space-2);
+    margin: 0;
+  }
+
+  .policy {
+    padding-block: var(--space-12) var(--space-16);
+    display: grid;
+    gap: var(--space-10);
+    max-width: 75ch;
+  }
+
+  /* Sections are separated by the grid gap alone, whatever they end
+     with (paragraph, list or table note). */
+  .policy section > :last-child {
+    margin-block-end: 0;
+  }
+
+  .policy h2 {
+    font-size: var(--text-xl);
+  }
+
+  .section-number {
+    color: var(--color-accent);
+  }
+
+  .policy ul {
+    display: grid;
+    gap: var(--space-2);
+    list-style: none;
+    margin: var(--space-2) 0 0;
+    padding: 0;
+  }
+
+  .policy ul li {
+    position: relative;
+    padding-inline-start: var(--space-5);
+  }
+
+  .policy ul li::before {
+    content: '';
+    position: absolute;
+    inset-inline-start: 0;
+    top: 0.65em;
+    width: 0.4rem;
+    height: 0.4rem;
+    border-radius: var(--radius-full);
+    background: var(--color-accent);
+  }
+
+  /* Permissions table — collapses to stacked cards on small screens so
+     the page never scrolls horizontally. */
+  .table-wrap {
+    margin-block-start: var(--space-4);
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: start;
+  }
+
+  th,
+  td {
+    text-align: start;
+    vertical-align: top;
+    padding: var(--space-3) var(--space-4);
+    border-block-end: 1px solid var(--color-border);
+  }
+
+  thead th {
+    color: var(--color-text-muted);
+    font-size: var(--text-sm);
+  }
+
+  td.perm {
+    font-weight: 600;
+    width: 30%;
+  }
+
+  .table-note {
+    color: var(--color-text-muted);
+    font-size: var(--text-sm);
+    margin-block-start: var(--space-3);
+  }
+
+  @media (max-width: 47.99rem) {
+    thead {
+      display: none;
+    }
+
+    table,
+    tbody,
+    tr,
+    td {
+      display: block;
+      width: 100%;
+    }
+
+    tr {
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      padding: var(--space-4);
+    }
+
+    tr:last-child {
+      border-block-end: 1px solid var(--color-border);
+    }
+
+    td {
+      border-block-end: none;
+      padding: 0;
+    }
+
+    td.perm {
+      width: 100%;
+      color: var(--color-accent);
+      margin-block-end: var(--space-2);
+    }
+  }
+</style>

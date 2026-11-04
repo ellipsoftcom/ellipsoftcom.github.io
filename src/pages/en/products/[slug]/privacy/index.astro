@@ -1,0 +1,20 @@
+---
+import ProductPrivacy from '../../../../../views/ProductPrivacy.astro';
+import { products } from '../../../../../data/products';
+import type { Product } from '../../../../../data/products';
+
+export function getStaticPaths() {
+  return products.map((product) => ({
+    params: { slug: product.slug },
+    props: { product },
+  }));
+}
+
+interface Props {
+  product: Product;
+}
+
+const { product } = Astro.props;
+---
+
+<ProductPrivacy locale="en" product={product} />

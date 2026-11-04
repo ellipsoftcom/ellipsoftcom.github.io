@@ -1,0 +1,163 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { SITE, whatsappUrl } from '../config';
+import type { Locale } from '../i18n/ui';
+import { getDictionary } from '../i18n/utils';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = getDictionary(locale);
+const p = t.pages.contact;
+---
+
+<BaseLayout locale={locale} title={p.title} description={p.description} pagePath="/contact/">
+  {/* Hero. */}
+  <section class="page-hero">
+    <div class="container">
+      <h1>{p.heroTitle}</h1>
+      <p>{p.heroSubtitle}</p>
+    </div>
+  </section>
+
+  {/* Contact channels. */}
+  <section class="container section">
+    <h2>{p.channelsHeading}</h2>
+    <ul class="channels">
+      <li>
+        <span>{p.whatsappChannel}</span>
+        <span class="channel-stack">
+          <a class="button" href={whatsappUrl} rel="noopener noreferrer" target="_blank">
+            {t.whatsappLabel}
+          </a>
+          <a class="number" href={whatsappUrl} rel="noopener noreferrer" target="_blank" dir="ltr">
+            {SITE.whatsappDisplay}
+          </a>
+        </span>
+      </li>
+      <li>
+        <span>{p.emailChannel}</span>
+        <a href={`mailto:${SITE.email}`}>{SITE.email}</a>
+      </li>
+      <li>
+        <span>{p.facebookChannel}</span>
+        <a href={SITE.facebook} rel="noopener noreferrer" target="_blank">
+          {p.facebookLinkLabel}
+        </a>
+      </li>
+    </ul>
+  </section>
+
+  {/* Make your first message useful. */}
+  <section class="container section">
+    <h2>{p.usefulHeading}</h2>
+    <p class="intro">{p.usefulIntro}</p>
+    <ol class="useful">
+      {p.usefulItems.map((item) => <li>{item}</li>)}
+    </ol>
+  </section>
+
+  {/* What happens next. */}
+  <section class="container section">
+    <h2>{p.nextHeading}</h2>
+    <p>{p.nextText}</p>
+  </section>
+</BaseLayout>
+
+<style>
+  .page-hero {
+    padding-block: var(--space-16) var(--space-12);
+    border-block-end: 1px solid var(--color-border);
+  }
+
+  h1 {
+    font-size: var(--text-3xl);
+  }
+
+  .page-hero p {
+    color: var(--color-text-muted);
+    font-size: var(--text-lg);
+    max-width: 60ch;
+  }
+
+  .section {
+    padding-block: var(--space-12);
+  }
+
+  .section h2 {
+    font-size: var(--text-2xl);
+  }
+
+  .channels {
+    display: grid;
+    gap: var(--space-4);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .channels li {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+    flex-wrap: wrap;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-4) var(--space-6);
+  }
+
+  .channels li > span:first-child {
+    color: var(--color-text-muted);
+    font-weight: 600;
+  }
+
+  .channel-stack {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: var(--space-2);
+  }
+
+  /* Phone number: keep LTR ordering inside RTL Arabic text. */
+  .number {
+    display: inline-block;
+    padding-block: var(--space-1);
+    font-size: var(--text-sm);
+    unicode-bidi: isolate;
+  }
+
+  .intro {
+    margin-block: 0 var(--space-2);
+  }
+
+  .useful {
+    display: grid;
+    gap: var(--space-3);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    max-width: 65ch;
+  }
+
+  .useful li {
+    position: relative;
+    padding-inline-start: var(--space-6);
+    color: var(--color-text);
+  }
+
+  .useful li::before {
+    content: counter(list-item) '.';
+    position: absolute;
+    inset-inline-start: 0;
+    color: var(--color-accent);
+    font-weight: 700;
+  }
+
+  .section p:not(.intro) {
+    max-width: 65ch;
+  }
+</style>

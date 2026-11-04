@@ -1,0 +1,70 @@
+name: Deploy to GitHub Pages
+
+# Builds the Astro site ONCE, verifies that exact dist/ output, and only
+# then uploads it as the Pages artifact and deploys it. If `npm run
+# verify` fails, the job stops before the upload step: no artifact is
+# created and the deploy job (which needs this job) never runs.
+#
+# PREPARED BUT NOT ACTIVE YET: this workflow only triggers on pushes to
+# `main`. The `rebuild` branch never triggers it, and the repository's
+# Pages setting currently serves the `main` branch directly, so merging
+# to main alone does NOT flip deployment. At launch time the owner must
+# switch Settings → Pages → Source to "GitHub Actions" (owner-only step).
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow only one concurrent deployment; skip queued runs, don't cancel
+# a deployment already in progress.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Set up Node (version from .nvmrc)
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      # Checks the dist/ produced by the step above — no rebuild between
+      # verify and upload, so the deployed files are the verified files.
+      - name: Verify build output
+        run: npm run verify
+
+      # upload-pages-artifact v3 archives the whole directory, including
+      # dotfiles such as .nojekyll.
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

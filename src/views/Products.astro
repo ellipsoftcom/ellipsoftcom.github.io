@@ -1,0 +1,148 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import type { Locale } from '../i18n/ui';
+import { getDictionary, localizedPath } from '../i18n/utils';
+import { products } from '../data/products';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = getDictionary(locale);
+const p = t.pages.products;
+
+const statusLabel = (status: string) =>
+  status === 'coming-soon' ? t.products.statusComingSoon : t.products.statusAvailable;
+---
+
+<BaseLayout locale={locale} title={p.title} description={p.description} pagePath="/products/">
+  <section class="page-hero">
+    <div class="container">
+      <h1>{p.heading}</h1>
+      <p>{p.body}</p>
+    </div>
+  </section>
+
+  <section class="container listing">
+    <ul class="product-grid">
+      {
+        products.map((product) => (
+          <li class="product-card">
+            <div class="card-head">
+              <h2>{product.headline[locale]}</h2>
+              <span class="badge">{statusLabel(product.status)}</span>
+            </div>
+            <p class="tagline">{product.subtitle[locale]}</p>
+            <p class="meta">
+              <span>{product.platform}</span>
+              <span aria-hidden="true">·</span>
+              <span>{product.price[locale]}</span>
+            </p>
+            <a
+              class="card-link"
+              href={localizedPath(locale, `/products/${product.slug}/`)}
+              aria-label={t.products.viewProduct.replace(/\{name\}/g, product.name[locale])}
+            >
+              {t.products.viewProduct.replace(/\{name\}/g, product.name[locale])}
+            </a>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+</BaseLayout>
+
+<style>
+  .page-hero {
+    padding-block: var(--space-16) var(--space-12);
+    border-block-end: 1px solid var(--color-border);
+  }
+
+  h1 {
+    font-size: var(--text-3xl);
+  }
+
+  .page-hero p {
+    color: var(--color-text-muted);
+    font-size: var(--text-lg);
+    max-width: 60ch;
+  }
+
+  .listing {
+    padding-block: var(--space-12);
+  }
+
+  .product-grid {
+    display: grid;
+    gap: var(--space-6);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  @media (min-width: 48rem) {
+    .product-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  .product-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-8) var(--space-6);
+  }
+
+  .card-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+    flex-wrap: wrap;
+  }
+
+  .card-head h2 {
+    font-size: var(--text-xl);
+    margin: 0;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    background: var(--color-accent-soft);
+    color: var(--color-accent);
+    border-radius: var(--radius-full);
+    padding: var(--space-1) var(--space-3);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .tagline {
+    color: var(--color-text);
+    margin: 0;
+  }
+
+  .meta {
+    display: flex;
+    gap: var(--space-2);
+    color: var(--color-text-muted);
+    font-size: var(--text-sm);
+    margin: 0;
+  }
+
+  .card-link {
+    margin-block-start: auto;
+    color: var(--color-accent);
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .card-link:hover {
+    color: var(--color-accent-strong);
+  }
+</style>

@@ -1,0 +1,120 @@
+---
+import '../styles/fonts.css';
+import '../styles/global.css';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { SITE } from '../config';
+import { defaultLocale, directions, ogLocales } from '../i18n/ui';
+import type { Locale } from '../i18n/ui';
+import { getDictionary, localizedPath } from '../i18n/utils';
+import { serializeJsonLd } from '../seo/jsonLd';
+import type { JsonLd } from '../seo/jsonLd';
+
+interface Props {
+  locale: Locale;
+  title: string;
+  description: string;
+  /** Locale-relative path of this page ('/' for the locale home). */
+  pagePath?: string;
+  /** Emit robots noindex,follow (used by the 404 page). */
+  noindex?: boolean;
+  /** Absolute canonical override (used by the 404 page). */
+  canonicalUrl?: string;
+  /** Omit hreflang alternates (used by the 404 page). */
+  hideAlternates?: boolean;
+  /** OG image path override, e.g. '/og/waraq-ar.png'. Defaults to the
+   *  company image of the page language. */
+  ogImagePath?: string;
+  /** OG image alt override; should match the chosen image's text. */
+  ogImageAlt?: string;
+  /** schema.org nodes emitted as one application/ld+json block. */
+  jsonLd?: JsonLd[];
+}
+
+const {
+  locale,
+  title,
+  description,
+  pagePath = '/',
+  noindex = false,
+  canonicalUrl,
+  hideAlternates = false,
+  ogImagePath,
+  ogImageAlt,
+  jsonLd = [],
+} = Astro.props;
+
+const t = getDictionary(locale);
+const ogPath =
+  ogImagePath ?? (locale === 'ar' ? '/og/ellipsoft-ar.png' : '/og/ellipsoft-en.png');
+const ogImage = `${SITE.url}${ogPath}`;
+const imageAlt = ogImageAlt ?? t.og.companyAlt;
+
+// Self-hosted fonts: @font-face rules with unicode-range live in
+// src/styles/fonts.css (see the note there), so each page downloads only
+// the subsets its text uses. Only the critical body font (regular
+// weight, main script of the page language) is preloaded; `?url`
+// resolves to the same hashed file the @font-face rule points at.
+import arabicBodyFont from '@fontsource/ibm-plex-sans-arabic/files/ibm-plex-sans-arabic-arabic-400-normal.woff2?url';
+import latinBodyFont from '@fontsource/ibm-plex-sans/files/ibm-plex-sans-latin-400-normal.woff2?url';
+
+const preloadFont = locale === 'ar' ? arabicBodyFont : latinBodyFont;
+
+const canonical = canonicalUrl ?? `${SITE.url}${localizedPath(locale, pagePath)}`;
+const alternates = {
+  ar: `${SITE.url}${localizedPath('ar', pagePath)}`,
+  en: `${SITE.url}${localizedPath('en', pagePath)}`,
+  // x-default points at the Arabic (default) version — decision #6.
+  'x-default': `${SITE.url}${localizedPath(defaultLocale, pagePath)}`,
+} as const;
+---
+
+<!doctype html>
+<html lang={locale} dir={directions[locale]}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{title}</title>
+    <link rel="preload" href={preloadFont} as="font" type="font/woff2" crossorigin />
+    <meta name="description" content={description} />
+    {noindex && <meta name="robots" content="noindex, follow" />}
+    <link rel="canonical" href={canonical} />
+    {!hideAlternates && (
+      <>
+        <link rel="alternate" hreflang="ar" href={alternates.ar} />
+        <link rel="alternate" hreflang="en" href={alternates.en} />
+        <link rel="alternate" hreflang="x-default" href={alternates['x-default']} />
+      </>
+    )}
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="theme-color" content="#0F172A" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content={SITE.name} />
+    <meta property="og:locale" content={ogLocales[locale]} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content={imageAlt} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+    {/* Static structured data — the only <script> type allowed (AGENTS.md). */}
+    {jsonLd.length > 0 && (
+      <script is:inline type="application/ld+json" set:html={serializeJsonLd(jsonLd)} />
+    )}
+  </head>
+  <body>
+    <a class="skip-link" href="#main">{t.skipToContent}</a>
+    <Header locale={locale} />
+    <main id="main">
+      <slot />
+    </main>
+    <Footer locale={locale} />
+  </body>
+</html>

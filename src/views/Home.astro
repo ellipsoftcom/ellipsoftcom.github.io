@@ -1,0 +1,282 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ArrowLabel from '../components/ArrowLabel.astro';
+import type { Locale } from '../i18n/ui';
+import { getDictionary, localizedPath } from '../i18n/utils';
+import { products } from '../data/products';
+import { services } from '../data/services';
+import { organizationJsonLd, websiteJsonLd } from '../seo/jsonLd';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = getDictionary(locale);
+const p = t.pages.home;
+
+// "From our products" card — first catalogue entry (Waraq), existing
+// implementation: headline + subtitle + link.
+const featured = products[0];
+const featuredName = featured.name[locale];
+const featuredHref = localizedPath(locale, `/products/${featured.slug}/`);
+
+const servicesHref = localizedPath(locale, '/services/');
+const contactHref = localizedPath(locale, '/contact/');
+---
+
+<BaseLayout
+  locale={locale}
+  title={p.title}
+  description={p.description}
+  pagePath="/"
+  jsonLd={[organizationJsonLd(), websiteJsonLd(locale)]}
+>
+  {/* Hero — dark brand section with two CTAs. */}
+  <section class="hero brand-surface">
+    <div class="container">
+      <h1>{p.heroTitle}</h1>
+      <p>{p.heroSubtitle}</p>
+      <div class="hero-actions">
+        <a class="button" href={contactHref}>{p.heroPrimaryCta}</a>
+        <a class="button-ghost" href={servicesHref}>{p.heroSecondaryCta}</a>
+      </div>
+    </div>
+  </section>
+
+  {/* What we offer — service cards (title + summary). */}
+  <section class="container section">
+    <h2>{p.offerHeading}</h2>
+    <ul class="offer-grid">
+      {
+        services.map((service) => (
+          <li class="offer-card">
+            <h3>{service.title[locale]}</h3>
+            <p>{service.summary[locale]}</p>
+          </li>
+        ))
+      }
+    </ul>
+    <a class="section-link" href={servicesHref}><ArrowLabel text={p.offerLink} /></a>
+  </section>
+
+  {/* Why EllipSoft. */}
+  <section class="container section">
+    <h2>{p.whyHeading}</h2>
+    <ul class="titled-list">
+      {
+        p.whyItems.map((item) => (
+          <li>
+            <strong>{item.title}</strong> — {item.text}
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  {/* From our products. */}
+  <section class="container section">
+    <h2>{p.productsHeading}</h2>
+    <div class="feature-card">
+      <div class="feature-info">
+        <h3>{featured.headline[locale]}</h3>
+        <p class="subtitle">{featured.subtitle[locale]}</p>
+        <p class="meta">
+          <span>{featured.platform}</span>
+          <span aria-hidden="true">·</span>
+          <span>{featured.price[locale]}</span>
+          <span aria-hidden="true">·</span>
+          <span>{featured.status === 'coming-soon' ? t.products.statusComingSoon : t.products.statusAvailable}</span>
+        </p>
+      </div>
+      <a class="card-link" href={featuredHref}>
+        {t.products.viewProduct.replace(/\{name\}/g, featuredName)}
+      </a>
+    </div>
+  </section>
+
+  {/* Final call to action. */}
+  <section class="container section cta">
+    <h2>{p.finalCtaHeading}</h2>
+    <p>{p.finalCtaText}</p>
+    <a class="button" href={contactHref}>{p.finalCtaLabel}</a>
+  </section>
+</BaseLayout>
+
+<style>
+  .hero {
+    padding-block: var(--space-24) var(--space-16);
+    background:
+      radial-gradient(60rem 30rem at 85% -10%, var(--color-accent-soft), transparent),
+      var(--color-bg);
+  }
+
+  .hero h1 {
+    font-size: var(--text-3xl);
+    max-width: 22ch;
+  }
+
+  .hero p {
+    color: var(--color-text-muted);
+    font-size: var(--text-lg);
+    max-width: 60ch;
+  }
+
+  .hero-actions {
+    display: flex;
+    gap: var(--space-4);
+    flex-wrap: wrap;
+    margin-block-start: var(--space-6);
+  }
+
+  /* Secondary (ghost) button on the dark hero: teal outline + teal text
+     (9.59:1 on the brand surface). */
+  .button-ghost {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    background: transparent;
+    color: var(--color-accent);
+    border: 1px solid var(--color-accent);
+    border-radius: var(--radius-md);
+    padding: var(--space-3) var(--space-6);
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .button-ghost:hover {
+    background: var(--color-accent-soft);
+  }
+
+  .section {
+    padding-block: var(--space-12);
+  }
+
+  .section h2 {
+    font-size: var(--text-2xl);
+  }
+
+  .offer-grid {
+    display: grid;
+    gap: var(--space-6);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  @media (min-width: 48rem) {
+    .offer-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  .offer-card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-6);
+  }
+
+  .offer-card h3 {
+    font-size: var(--text-lg);
+    margin-block: 0 var(--space-2);
+  }
+
+  .offer-card p {
+    color: var(--color-text-muted);
+    margin: 0;
+  }
+
+  .section-link {
+    display: inline-block;
+    margin-block-start: var(--space-6);
+    color: var(--color-accent);
+    font-weight: 600;
+  }
+
+  .section-link:hover {
+    color: var(--color-accent-strong);
+  }
+
+  .titled-list {
+    display: grid;
+    gap: var(--space-4);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    max-width: 65ch;
+  }
+
+  .titled-list li {
+    position: relative;
+    padding-inline-start: var(--space-5);
+  }
+
+  .titled-list li::before {
+    content: '';
+    position: absolute;
+    inset-inline-start: 0;
+    top: 0.55em;
+    width: 0.5rem;
+    height: 0.5rem;
+    border-radius: var(--radius-full);
+    background: var(--color-accent);
+  }
+
+  .titled-list strong {
+    font-weight: 600;
+  }
+
+  .feature-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-6);
+    flex-wrap: wrap;
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-8) var(--space-6);
+    margin-block-start: var(--space-6);
+  }
+
+  .feature-info h3 {
+    font-size: var(--text-xl);
+    margin-block: 0 var(--space-2);
+  }
+
+  .subtitle {
+    margin-block: 0 var(--space-2);
+  }
+
+  .meta {
+    display: flex;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+    color: var(--color-text-muted);
+    font-size: var(--text-sm);
+    margin: 0;
+  }
+
+  .card-link {
+    color: var(--color-accent);
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .card-link:hover {
+    color: var(--color-accent-strong);
+  }
+
+  .cta {
+    padding-block: var(--space-12) var(--space-16);
+  }
+
+  .cta p {
+    max-width: 65ch;
+  }
+
+  .cta .button {
+    margin-block-start: var(--space-2);
+  }
+</style>

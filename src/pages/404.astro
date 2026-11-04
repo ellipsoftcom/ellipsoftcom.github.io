@@ -1,0 +1,69 @@
+---
+// 404 page — bilingual-friendly: Arabic (default) first with an English
+// line underneath, noindex, canonical to /404.html (matches the
+// previous site's approach).
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { SITE } from '../config';
+import { getDictionary } from '../i18n/utils';
+
+const ar = getDictionary('ar');
+const en = getDictionary('en');
+---
+
+<BaseLayout
+  locale="ar"
+  title={ar.notFound.title}
+  description={ar.notFound.description}
+  noindex
+  canonicalUrl={`${SITE.url}/404.html`}
+  hideAlternates
+>
+  <section class="container notfound">
+    <h1>{ar.notFound.heading}</h1>
+    {/* English counterpart of the heading: a styled paragraph, not a
+        second heading — it translates the h1 rather than starting a
+        new section, so the page keeps one h1 and a clean outline. */}
+    <p class="heading-en" lang="en" dir="ltr">{en.notFound.heading}</p>
+    <p>{ar.notFound.body}</p>
+    <p lang="en" dir="ltr">{en.notFound.body}</p>
+    <div class="links">
+      <a class="button" href="/ar/">{ar.notFound.linkHome}</a>
+      <a class="button" lang="en" dir="ltr" href="/en/">{en.notFound.linkHome}</a>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .notfound {
+    padding-block: var(--space-24);
+    min-height: 50vh;
+  }
+
+  h1 {
+    font-size: var(--text-3xl);
+  }
+
+  h1 {
+    margin-block-end: var(--space-2);
+  }
+
+  p {
+    color: var(--color-text-muted);
+    font-size: var(--text-lg);
+  }
+
+  .heading-en {
+    color: var(--color-text);
+    font-size: var(--text-2xl);
+    font-weight: 700;
+    line-height: 1.25;
+    margin-block-end: var(--space-6);
+  }
+
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-4);
+    margin-block-start: var(--space-8);
+  }
+</style>

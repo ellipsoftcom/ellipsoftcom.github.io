@@ -1,0 +1,116 @@
+---
+import { SITE, whatsappUrl } from '../config';
+import type { Locale } from '../i18n/ui';
+import { getDictionary } from '../i18n/utils';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = getDictionary(locale);
+const year = new Date().getFullYear();
+const copyright = t.copyright.replace('{year}', String(year));
+---
+
+<footer class="site-footer brand-surface">
+  <div class="container footer-grid">
+    <div>
+      <p class="brand">{SITE.name}</p>
+      <p class="tagline">{t.footerTagline}</p>
+    </div>
+
+    <div>
+      <h2>{t.footerContactTitle}</h2>
+      <ul class="contact-list">
+        <li>
+          <a href={`mailto:${SITE.email}`}>{t.emailLabel} — {SITE.email}</a>
+        </li>
+        <li>
+          <a class="button" href={whatsappUrl} rel="noopener noreferrer" target="_blank">
+            {t.whatsappLabel}
+          </a>
+        </li>
+        <li>
+          <a href={SITE.facebook} rel="noopener noreferrer" target="_blank">
+            {t.facebookLabel}
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="container footer-bottom">
+    <p>{copyright}</p>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    background: var(--color-bg);
+    border-block-start: 1px solid var(--color-border);
+    margin-block-start: var(--space-24);
+    padding-block: var(--space-12) var(--space-6);
+  }
+
+  .footer-grid {
+    display: grid;
+    gap: var(--space-8);
+  }
+
+  @media (min-width: 48rem) {
+    .footer-grid {
+      grid-template-columns: 2fr 1fr;
+      gap: var(--space-16);
+    }
+  }
+
+  .brand {
+    font-size: var(--text-xl);
+    font-weight: 700;
+    margin-block: 0 var(--space-2);
+  }
+
+  .tagline {
+    color: var(--color-text-muted);
+    max-width: 38ch;
+    margin: 0;
+  }
+
+  h2 {
+    font-size: var(--text-lg);
+    margin-block: 0 var(--space-3);
+  }
+
+  .contact-list {
+    display: grid;
+    gap: var(--space-3);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .contact-list a:not(.button) {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    color: var(--color-text-muted);
+    text-decoration: none;
+  }
+
+  .contact-list a:not(.button):hover {
+    color: var(--color-accent);
+  }
+
+  .footer-bottom {
+    border-block-start: 1px solid var(--color-border);
+    margin-block-start: var(--space-8);
+    padding-block-start: var(--space-6);
+  }
+
+  .footer-bottom p {
+    color: var(--color-text-muted);
+    font-size: var(--text-sm);
+    margin: 0;
+  }
+</style>

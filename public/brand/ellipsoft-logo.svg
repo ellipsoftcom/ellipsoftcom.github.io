@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="210" height="48" viewBox="0 0 210 48" role="img" aria-label="EllipSoft">
+  <title>EllipSoft</title>
+  <g transform="translate(0 4) scale(1.25)">
+    <svg viewBox="0 0 32 32" width="32" height="32"><g transform="rotate(-20 16 16)"><ellipse cx="16" cy="16" rx="11.2" ry="6.6" fill="none" stroke="#0F172A" stroke-width="2.8"/><ellipse cx="16" cy="16" rx="4" ry="2.4" fill="#2DD4BF"/></g></svg>
+  </g>
+  <text x="52" y="32" font-family="Inter, Helvetica, Arial, sans-serif" font-size="27" font-weight="700" letter-spacing="-0.5">
+    <tspan fill="#0F172A">Ellip</tspan><tspan fill="#0F766E">Soft</tspan>
+  </text>
+</svg>

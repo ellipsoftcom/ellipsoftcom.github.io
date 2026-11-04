@@ -1,0 +1,166 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import type { Locale } from '../i18n/ui';
+import { getDictionary, localizedPath } from '../i18n/utils';
+import { services } from '../data/services';
+
+interface Props {
+  locale: Locale;
+}
+
+const { locale } = Astro.props;
+const t = getDictionary(locale);
+const p = t.pages.services;
+---
+
+<BaseLayout locale={locale} title={p.title} description={p.description} pagePath="/services/">
+  {/* Hero. */}
+  <section class="page-hero">
+    <div class="container">
+      <h1>{p.heroTitle}</h1>
+      <p>{p.heroSubtitle}</p>
+    </div>
+  </section>
+
+  {/* Services — one card per catalogue entry. */}
+  <section class="container listing">
+    <ol class="service-list">
+      {
+        services.map((service, index) => (
+          <li class="service-card">
+            <h2>
+              <span class="service-number">{index + 1}.</span> {service.title[locale]}
+            </h2>
+            <p class="description">{service.description[locale]}</p>
+            <p class="good-fit">{service.goodFitFor[locale]}</p>
+          </li>
+        ))
+      }
+    </ol>
+  </section>
+
+  {/* How we work with you — numbered steps. */}
+  <section class="container section">
+    <h2>{p.workHeading}</h2>
+    <ol class="steps">
+      {
+        p.workSteps.map((step, index) => (
+          <li>
+            <span class="step-number">{index + 1}.</span>
+            <div>
+              <strong>{step.title}</strong> — {step.text}
+            </div>
+          </li>
+        ))
+      }
+    </ol>
+  </section>
+
+  {/* Call to action. */}
+  <section class="container section cta">
+    <h2>{p.ctaHeading}</h2>
+    <p>{p.ctaText}</p>
+    <a class="button" href={localizedPath(locale, '/contact/')}>{p.ctaLabel}</a>
+  </section>
+</BaseLayout>
+
+<style>
+  .page-hero {
+    padding-block: var(--space-16) var(--space-12);
+    border-block-end: 1px solid var(--color-border);
+  }
+
+  h1 {
+    font-size: var(--text-3xl);
+  }
+
+  .page-hero p {
+    color: var(--color-text-muted);
+    font-size: var(--text-lg);
+    max-width: 60ch;
+  }
+
+  .listing {
+    padding-block: var(--space-12);
+  }
+
+  .service-list {
+    display: grid;
+    gap: var(--space-6);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  @media (min-width: 48rem) {
+    .service-list {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  .service-card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-8) var(--space-6);
+  }
+
+  .service-card h2 {
+    font-size: var(--text-xl);
+    margin-block: 0 var(--space-3);
+  }
+
+  .service-number {
+    color: var(--color-accent);
+  }
+
+  .description {
+    margin-block: 0 var(--space-3);
+  }
+
+  .good-fit {
+    color: var(--color-text-muted);
+    margin: 0;
+  }
+
+  .section {
+    padding-block: var(--space-12);
+  }
+
+  .section h2 {
+    font-size: var(--text-2xl);
+  }
+
+  .steps {
+    display: grid;
+    gap: var(--space-4);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    max-width: 65ch;
+  }
+
+  .steps li {
+    display: flex;
+    gap: var(--space-3);
+    align-items: baseline;
+  }
+
+  .step-number {
+    color: var(--color-accent);
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .steps strong {
+    font-weight: 600;
+  }
+
+  .cta {
+    padding-block: var(--space-12) var(--space-16);
+  }
+
+  .cta p {
+    max-width: 65ch;
+  }
+</style>

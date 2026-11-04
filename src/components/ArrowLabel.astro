@@ -1,0 +1,15 @@
+---
+/**
+ * Link label whose trailing direction arrow ("… ←" / "… →") is
+ * decorative: the arrow stays visible but is hidden from assistive
+ * technology, so screen readers don't announce "left arrow".
+ */
+interface Props {
+  text: string;
+}
+
+const { text } = Astro.props;
+const match = text.match(/^(.*?)\s*([←→])$/);
+---
+
+{match ? <>{match[1]} <span aria-hidden="true">{match[2]}</span></> : text}

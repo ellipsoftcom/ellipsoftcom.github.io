@@ -1,0 +1,24 @@
+---
+// Root "/" stub — instant redirect to the Arabic (default) homepage.
+// GitHub Pages static hosting cannot issue a real 301, so this uses a
+// zero-second meta refresh plus a canonical to /ar/ and robots noindex
+// (mirrors the behaviour of the previous site).
+import { SITE } from '../config';
+const target = `${SITE.url}/ar/`;
+---
+
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>EllipSoft</title>
+    <meta http-equiv="refresh" content={`0; url=${target}`} />
+    <link rel="canonical" href={target} />
+    <meta name="robots" content="noindex, follow" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  </head>
+  <body>
+    <p><a href="/ar/">EllipSoft</a></p>
+  </body>
+</html>
